@@ -11,6 +11,7 @@ import mesosphere.marathon.core.CoreGuiceModule
 import mesosphere.marathon.core.plugin.PluginConfiguration
 import mesosphere.marathon.event.http.{ HttpEventConfiguration, HttpEventModule }
 import mesosphere.marathon.event.{ EventConfiguration, EventModule }
+import mesosphere.marathon.metrics.{ MetricsReporterModule, MetricsReporterService, MetricsConf }
 import org.apache.log4j.Logger
 import org.rogach.scallop.ScallopConf
 
@@ -52,6 +53,7 @@ class MarathonApp extends App {
     Seq(
       new HttpModule(conf),
       new MetricsModule,
+      new MetricsReporterModule(conf),
       new MarathonModule(conf, conf, zk),
       new MarathonRestModule,
       new EventModule(conf),
@@ -79,6 +81,7 @@ class MarathonApp extends App {
     with AppConfiguration
     with EventConfiguration
     with HttpEventConfiguration
+    with MetricsConf
     with DebugConf
     with PluginConfiguration
 
@@ -88,7 +91,8 @@ class MarathonApp extends App {
     log.info(s"Starting Marathon ${BuildInfo.version} with ${args.mkString(" ")}")
     run(
       classOf[HttpService],
-      classOf[MarathonSchedulerService]
+      classOf[MarathonSchedulerService],
+      classOf[MetricsReporterService]
     )
   }
 }
