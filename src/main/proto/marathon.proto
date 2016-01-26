@@ -100,6 +100,7 @@ message MarathonTask {
   optional mesos.TaskStatus status = 9;
   optional mesos.SlaveID slaveId = 10;
   repeated mesos.NetworkInfo networks = 11;
+  optional string volume_id = 12;
 }
 
 message MarathonApp {
