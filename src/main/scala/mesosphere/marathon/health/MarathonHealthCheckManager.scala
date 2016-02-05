@@ -8,20 +8,21 @@ import akka.pattern.ask
 import akka.util.Timeout
 import mesosphere.marathon.Protos.HealthCheckDefinition.Protocol
 import mesosphere.marathon.Protos.MarathonTask
+import mesosphere.marathon.core.task.Task
 import mesosphere.marathon.core.task.tracker.TaskTracker
 import mesosphere.marathon.event.{ AddHealthCheck, EventModule, RemoveHealthCheck }
 import mesosphere.marathon.health.HealthCheckActor.{ AppHealth, GetAppHealth }
 import mesosphere.marathon.state.{ AppDefinition, AppRepository, PathId, Timestamp }
-import mesosphere.marathon.tasks.{ TaskIdUtil }
-import mesosphere.marathon.{ ZookeeperConf, MarathonScheduler, MarathonSchedulerDriverHolder }
+import mesosphere.marathon.tasks.TaskIdUtil
+import mesosphere.marathon.{ MarathonScheduler, MarathonSchedulerDriverHolder, ZookeeperConf }
 import mesosphere.util.RWLock
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.apache.mesos.Protos.TaskStatus
 
 import scala.collection.immutable.{ Map, Seq }
 import scala.collection.mutable
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.{ Await, Future }
 
 class MarathonHealthCheckManager @Inject() (
     system: ActorSystem,
@@ -202,8 +203,8 @@ class MarathonHealthCheckManager @Inject() (
     implicit val timeout: Timeout = Timeout(2, SECONDS)
 
     val futureAppVersion: Future[Option[Timestamp]] = for {
-      maybeTask <- taskTracker.marathonTask(appId, taskId)
-    } yield maybeTask.map(t => Timestamp(t.getVersion))
+      maybeTaskState <- taskTracker.task(Task.Id(taskId))
+    } yield maybeTaskState.flatMap(_.launchedTask).map(_.appVersion)
 
     futureAppVersion.flatMap {
       case None => Future.successful(Nil)

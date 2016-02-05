@@ -27,7 +27,7 @@ trait TaskTracker {
   def marathonTaskSync(appId: PathId, taskId: String): Option[MarathonTask]
   def marathonTask(appId: PathId, taskId: String)(implicit ec: ExecutionContext): Future[Option[MarathonTask]]
 
-  def task(appId: PathId, taskId: Task.Id)(implicit ec: ExecutionContext): Future[Option[Task]]
+  def task(taskId: Task.Id)(implicit ec: ExecutionContext): Future[Option[Task]]
 
   def tasksByAppSync: TaskTracker.TasksByApp
   def tasksByApp()(implicit ec: ExecutionContext): Future[TaskTracker.TasksByApp]
@@ -59,8 +59,8 @@ object TaskTracker {
       task <- app.taskMap.get(taskId)
     } yield task
 
-    def taskState(appId: PathId, taskId: Task.Id): Option[Task] = for {
-      app <- appTasksMap.get(appId)
+    def taskState(taskId: Task.Id): Option[Task] = for {
+      app <- appTasksMap.get(taskId.appId)
       taskState <- app.taskStateMap.get(taskId.id)
     } yield taskState
 

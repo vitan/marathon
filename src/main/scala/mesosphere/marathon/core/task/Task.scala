@@ -2,7 +2,7 @@ package mesosphere.marathon.core.task
 
 import mesosphere.marathon.Protos.MarathonTask
 import mesosphere.marathon.core.task.tracker.impl.TaskSerializer
-import mesosphere.marathon.state.Timestamp
+import mesosphere.marathon.state.{ PathId, Timestamp }
 import mesosphere.marathon.tasks.TaskIdUtil
 import org.apache.mesos.{ Protos => MesosProtos }
 
@@ -15,6 +15,9 @@ case class Task(
     reservationWithVolume: Option[Task.ReservationWithVolume.type],
     launchCounter: Long,
     launchedTask: Option[Task.LaunchedTask]) {
+
+  def appId: PathId = taskId.appId
+
   /**
     * Legacy conversion to MarathonTask. Cache result to speed up repeated uses.
     * Should be removed before releasing 0.16.
@@ -24,7 +27,7 @@ case class Task(
 
 object Task {
   case class Id(id: String) {
-    lazy val appId = TaskIdUtil.appId(id)
+    lazy val appId: PathId = TaskIdUtil.appId(id)
     override def toString: String = s"task [$id]"
   }
 

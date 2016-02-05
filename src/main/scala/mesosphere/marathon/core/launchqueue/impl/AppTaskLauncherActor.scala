@@ -14,6 +14,7 @@ import mesosphere.marathon.core.matcher.base.OfferMatcher.{ TaskOp, MatchedTaskO
 import mesosphere.marathon.core.matcher.base.util.TaskOpSourceDelegate.TaskOpNotification
 import mesosphere.marathon.core.matcher.base.util.{ ActorOfferMatcher, TaskOpSourceDelegate }
 import mesosphere.marathon.core.matcher.manager.OfferMatcherManager
+import mesosphere.marathon.core.task.Task
 import mesosphere.marathon.core.task.bus.MarathonTaskStatus
 import mesosphere.marathon.core.task.bus.TaskStatusObservables.TaskStatusUpdate
 import mesosphere.marathon.core.task.tracker.TaskTracker
@@ -90,13 +91,13 @@ private class AppTaskLauncherActor(
     private[this] var tasksToLaunch: Int) extends Actor with ActorLogging with Stash {
   // scalastyle:on parameter.number
 
-  private[this] var inFlightTaskLaunches = Map.empty[String, Option[Cancellable]]
+  private[this] var inFlightTaskLaunches = Map.empty[Task.Id, Option[Cancellable]]
 
   private[this] var recheckBackOff: Option[Cancellable] = None
   private[this] var backOffUntil: Option[Timestamp] = None
 
   /** tasks that are in flight and those in the tracker */
-  private[this] var tasksMap: Map[String, MarathonTask] = _
+  private[this] var tasksMap: Map[Task.Id, Task] = _
 
   /** Decorator to use this actor as a [[base.OfferMatcher#TaskOpSource]] */
   private[this] val myselfAsLaunchSource = TaskOpSourceDelegate(self)
@@ -107,8 +108,8 @@ private class AppTaskLauncherActor(
     log.info("Started appTaskLaunchActor for {} version {} with initial count {}",
       app.id, app.version, tasksToLaunch)
 
-    val runningTasks = taskTracker.appTasksSync(app.id)
-    tasksMap = runningTasks.map(task => task.getId -> task).toMap
+    val runningTasks = taskTracker.tasksByAppSync.appTasksMap.get
+    tasksMap = runningTasks.
 
     rateLimiterActor ! RateLimiterActor.GetDelay(app)
   }
@@ -262,7 +263,7 @@ private class AppTaskLauncherActor(
       replyWithQueuedTaskCount()
   }
 
-  private[this] def removeTask(taskId: String): Unit = {
+  private[this] def removeTask(taskId: Task.Id): Unit = {
     inFlightTaskLaunches.get(taskId).foreach(_.foreach(_.cancel()))
     inFlightTaskLaunches -= taskId
     tasksMap -= taskId
