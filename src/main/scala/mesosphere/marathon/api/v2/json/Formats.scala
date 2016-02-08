@@ -494,7 +494,7 @@ trait AppAndGroupFormats {
       (__ \ "env").readNullable[Map[String, String]].withDefault(AppDefinition.DefaultEnv) ~
       (__ \ "instances").readNullable[Int](minValue(0)).withDefault(AppDefinition.DefaultInstances) ~
       (__ \ "cpus").readNullable[Double](greaterThan(0.0)).withDefault(AppDefinition.DefaultCpus) ~
-      (__ \ "mem").readNullable[Double].withDefault(AppDefinition.DefaultMem) ~
+      (__ \ "mem").readNullable[Double](greaterThan(0.0)).withDefault(AppDefinition.DefaultMem) ~
       (__ \ "disk").readNullable[Double].withDefault(AppDefinition.DefaultDisk) ~
       (__ \ "executor").readNullable[String](Reads.pattern(executorPattern))
       .withDefault(AppDefinition.DefaultExecutor) ~
@@ -728,7 +728,7 @@ trait AppAndGroupFormats {
     (__ \ "env").readNullable[Map[String, String]] ~
     (__ \ "instances").readNullable[Int](minValue(0)) ~
     (__ \ "cpus").readNullable[Double](greaterThan(0.0)) ~
-    (__ \ "mem").readNullable[Double] ~
+    (__ \ "mem").readNullable[Double](greaterThan(0.0)) ~
     (__ \ "disk").readNullable[Double] ~
     (__ \ "executor").readNullable[String](Reads.pattern("^(//cmd)|(/?[^/]+(/[^/]+)*)|$".r)) ~
     (__ \ "constraints").readNullable[Set[Constraint]] ~
