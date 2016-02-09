@@ -55,6 +55,20 @@ class AppsResourceTest extends MarathonSpec with Matchers with Mockito with Give
     JsonTestHelper.assertThatJsonString(response.getEntity.asInstanceOf[String]).correspondsToJsonOf(expected)
   }
 
+  test("Create a new app fails with Validation errors for negative resources") {
+    Given("An app with negative resources")
+    val app = AppDefinition(id = PathId("/app"), cmd = Some("cmd"), versionInfo = OnlyVersion(Timestamp.zero), mem = -128, cpus = -1, instances = -1, ports = Seq(-1800))
+    val group = Group(PathId("/"), Set(app))
+    val plan = DeploymentPlan(group, group)
+    val body = Json.stringify(Json.toJson(app)).getBytes("UTF-8")
+    groupManager.updateApp(any, any, any, any, any) returns Future.successful(plan)
+    groupManager.rootGroup() returns Future.successful(group)
+
+    Then("A constraint violation exception is thrown")
+    val response = appsResource.create(body, false, auth.request, auth.response)
+    response.getStatus should be(422)
+  }
+
   test("Create a new app fails with Validation errors") {
     Given("An app with validation errors")
     val app = AppDefinition(id = PathId("/app"))
