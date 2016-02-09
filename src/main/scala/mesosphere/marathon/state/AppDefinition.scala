@@ -470,12 +470,15 @@ object AppDefinition {
     appDef.dependencies is valid
     appDef.upgradeStrategy is valid
     appDef.storeUrls is every(urlCanBeResolvedValidator)
-    appDef.ports is elementsAreUnique(filterOutRandomPorts)
+    appDef.ports is elementsAreUnique(filterOutRandomPorts) and every(be >= 0)
     appDef.executor should matchRegexFully("^(//cmd)|(/?[^/]+(/[^/]+)*)|$")
     appDef is containsCmdArgsContainerValidator
     appDef is portIndicesAreValid
-    appDef.instances.intValue should be >= 0
     appDef.fetch is every(fetchUriIsValid)
+    appDef.mem should be >= 0.0
+    appDef.cpus should be >= 0.0
+    appDef.instances should be >= 0
+    appDef.disk should be >= 0.0
   }
 
   def filterOutRandomPorts(ports: scala.Seq[Int]): scala.Seq[Int] = {

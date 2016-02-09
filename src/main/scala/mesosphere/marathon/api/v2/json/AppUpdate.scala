@@ -121,7 +121,11 @@ object AppUpdate {
     appUp.dependencies is valid
     appUp.upgradeStrategy is valid
     appUp.storeUrls is optional(every(urlCanBeResolvedValidator))
-    appUp.ports is optional(elementsAreUnique(AppDefinition.filterOutRandomPorts))
+    appUp.ports is optional(elementsAreUnique(AppDefinition.filterOutRandomPorts)) and optional(every(be >= 0))
     appUp.fetch is optional(every(fetchUriIsValid))
+    appUp.mem should optional(be >= 0.0)
+    appUp.cpus should optional(be >= 0.0)
+    appUp.instances should optional(be >= 0)
+    appUp.disk should optional(be >= 0.0)
   }
 }
