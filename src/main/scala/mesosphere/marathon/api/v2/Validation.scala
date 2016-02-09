@@ -116,6 +116,11 @@ object Validation {
     }
   }
 
+  val isPositive: Validator[Int] = new Validator[Int] {
+    override def apply(v1: Int): Result =
+      if (v1 >= 0) Success else Failure(Set(RuleViolation(v1, "isPositive", None)))
+  }
+
   def theOnlyDefinedOptionIn[A <: Product: ClassTag, B](product: A): Validator[Option[B]] =
     new Validator[Option[B]] {
       def apply(option: Option[B]) = {

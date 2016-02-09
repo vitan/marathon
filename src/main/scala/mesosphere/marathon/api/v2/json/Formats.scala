@@ -502,8 +502,8 @@ trait AppAndGroupFormats {
       (__ \ "args").readNullable[Seq[String]] ~
       (__ \ "user").readNullable[String] ~
       (__ \ "env").readNullable[Map[String, String]].withDefault(AppDefinition.DefaultEnv) ~
-      (__ \ "instances").readNullable[Int](minValue(0)).withDefault(AppDefinition.DefaultInstances) ~
-      (__ \ "cpus").readNullable[Double](greaterThan(0.0)).withDefault(AppDefinition.DefaultCpus) ~
+      (__ \ "instances").readNullable[Int].withDefault(AppDefinition.DefaultInstances) ~
+      (__ \ "cpus").readNullable[Double].withDefault(AppDefinition.DefaultCpus) ~
       (__ \ "mem").readNullable[Double].withDefault(AppDefinition.DefaultMem) ~
       (__ \ "disk").readNullable[Double].withDefault(AppDefinition.DefaultDisk) ~
       (__ \ "executor").readNullable[String](Reads.pattern(executorPattern))
